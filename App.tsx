@@ -12,6 +12,7 @@ const App: React.FC = () => {
   const [baseMessage, setBaseMessage] = useState<string>('');
   const [isSending, setIsSending] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [errorLogs, setErrorLogs] = useState<string[]>([]);
 
   const handleFileLoaded = useCallback((data: string[][]) => {
     setError(null);
@@ -92,14 +93,29 @@ const App: React.FC = () => {
         });
 
         if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.details || 'Failed to send message via API.');
+          const errorText = await response.text();
+          let errorData;
+          try {
+            errorData = JSON.parse(errorText);
+          } catch {
+            errorData = { error: 'Server error', details: errorText };
+          }
+          
+          // Log the full error
+          const fullError = `[${new Date().toISOString()}] Failed for ${recipient.number}: Status ${response.status} - ${JSON.stringify(errorData)}`;
+          setErrorLogs(prev => [...prev, fullError]);
+          
+          throw new Error(errorData.details || errorData.error || 'Failed to send message via API.');
         }
+
+        const result = await response.json();
 
         setRecipients(prev => prev.map(r => r.id === recipient.id ? { ...r, status: RecipientStatus.SENT, personalizedMessage: messageToSend } : r));
 
       } catch (err: any) {
         console.error(`Failed to process message for ${recipient.number}:`, err);
+        const errorMsg = `[${new Date().toISOString()}] Error for ${recipient.number}: ${err.message} - ${err.stack || ''}`;
+        setErrorLogs(prev => [...prev, errorMsg]);
         setRecipients(prev => prev.map(r => r.id === recipient.id ? { ...r, status: RecipientStatus.FAILED } : r));
       }
     }
@@ -112,6 +128,7 @@ const App: React.FC = () => {
     setBaseMessage('');
     setIsSending(false);
     setError(null);
+    setErrorLogs([]);
   };
 
   return (
@@ -124,6 +141,28 @@ const App: React.FC = () => {
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg relative mb-6" role="alert">
             <strong className="font-bold">Error: </strong>
             <span className="block sm:inline">{error}</span>
+          </div>
+        )}
+
+        {errorLogs.length > 0 && (
+          <div className="bg-orange-50 border border-orange-300 rounded-lg p-4 mb-6">
+            <div className="flex justify-between items-center mb-3">
+              <h3 className="font-bold text-orange-900">Error Logs ({errorLogs.length})</h3>
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(errorLogs.join('\n\n'));
+                  alert('Error logs copied to clipboard!');
+                }}
+                className="px-3 py-1 bg-orange-600 text-white rounded text-sm hover:bg-orange-700"
+              >
+                Copy All
+              </button>
+            </div>
+            <div className="bg-white border border-orange-200 rounded p-3 max-h-60 overflow-y-auto">
+              <pre className="text-xs text-slate-800 whitespace-pre-wrap font-mono">
+                {errorLogs.join('\n\n')}
+              </pre>
+            </div>
           </div>
         )}
 
