@@ -1,20 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import Twilio from 'twilio';
 
-// Load credentials securely from Vercel environment variables
-const accountSid = process.env.TWILIO_ACCOUNT_SID;
-const authToken = process.env.TWILIO_AUTH_TOKEN;
-const messagingServiceSid = process.env.TWILIO_MESSAGING_SERVICE_SID;
-
-// Validate that all necessary environment variables are set
-if (!accountSid || !authToken || !messagingServiceSid) {
-  console.error("Twilio environment variables are not set.");
-  // We throw an error during initialization which will cause the function to fail if misconfigured
-  throw new Error("Twilio environment variables (TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_MESSAGING_SERVICE_SID) are not set. Please check your Vercel project settings.");
-}
-
-const client = Twilio(accountSid, authToken);
-
 export default async function handler(
   req: VercelRequest,
   res: VercelResponse,
@@ -22,7 +8,22 @@ export default async function handler(
   // Only allow POST requests to this endpoint
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST');
-    return res.status(405).end('Method Not Allowed');
+    return res.status(405).json({ success: false, error: 'Method Not Allowed' });
+  }
+
+  // Load credentials securely from Vercel environment variables
+  const accountSid = process.env.TWILIO_ACCOUNT_SID;
+  const authToken = process.env.TWILIO_AUTH_TOKEN;
+  const messagingServiceSid = process.env.TWILIO_MESSAGING_SERVICE_SID;
+
+  // Validate that all necessary environment variables are set
+  if (!accountSid || !authToken || !messagingServiceSid) {
+    console.error("Twilio environment variables are not set.");
+    return res.status(500).json({
+      success: false,
+      error: 'Server configuration error',
+      details: 'Twilio credentials not configured. Please set TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, and TWILIO_MESSAGING_SERVICE_SID in Vercel environment variables.'
+    });
   }
 
   const { to, message } = req.body;
@@ -33,6 +34,8 @@ export default async function handler(
   }
 
   try {
+    const client = Twilio(accountSid, authToken);
+
     // Use the Twilio client to send the SMS with Messaging Service
     const twilioResponse = await client.messages.create({
       body: message,
