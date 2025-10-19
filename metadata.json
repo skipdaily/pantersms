@@ -1,0 +1,5 @@
+{
+  "name": "Gemini Bulk SMS Platform",
+  "description": "An application to upload a CSV of phone numbers, compose a message, and use Gemini to personalize and send SMS messages in bulk.",
+  "requestFramePermissions": []
+}
