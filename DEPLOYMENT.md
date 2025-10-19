@@ -32,8 +32,13 @@ After deployment, you need to add your Twilio credentials:
 ```
 TWILIO_ACCOUNT_SID=<your-account-sid>
 TWILIO_AUTH_TOKEN=<your-auth-token>
-TWILIO_PHONE_NUMBER=+18446855206
+TWILIO_MESSAGING_SERVICE_SID=<your-messaging-service-sid>
 ```
+
+**How to get your Messaging Service SID:**
+- Go to Twilio Console: https://console.twilio.com/us1/develop/sms/services
+- Create a new Messaging Service or use an existing one
+- Copy the Messaging Service SID (starts with "MG...")
 
 4. Click **Save**
 5. Go to **Deployments** tab
