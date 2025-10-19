@@ -30,9 +30,9 @@ After deployment, you need to add your Twilio credentials:
 3. Add the following variables:
 
 ```
-TWILIO_ACCOUNT_SID=AC53359572f49c0575824eae1c983369f7
-TWILIO_AUTH_TOKEN=aa3aa0f40303706ea9c6c4b708835eda
-TWILIO_PHONE_NUMBER=+19166595059
+TWILIO_ACCOUNT_SID=<your-account-sid>
+TWILIO_AUTH_TOKEN=<your-auth-token>
+TWILIO_PHONE_NUMBER=+18446855206
 ```
 
 4. Click **Save**
