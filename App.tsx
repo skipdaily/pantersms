@@ -33,18 +33,18 @@ const App: React.FC = () => {
 
     const newRecipients: Recipient[] = data.slice(1).map((row, index) => {
       let phoneNumber = row[phoneIndex]?.trim();
-      
+
       // Auto-format phone number to E.164 format
       if (phoneNumber) {
         // Remove any non-digit characters except +
         phoneNumber = phoneNumber.replace(/[^\d+]/g, '');
-        
+
         // If doesn't start with +, add +1 for US numbers
         if (!phoneNumber.startsWith('+')) {
           phoneNumber = '+1' + phoneNumber;
         }
       }
-      
+
       return {
         id: `${Date.now()}-${index}`,
         name: nameIndex !== -1 ? row[nameIndex] : undefined,
