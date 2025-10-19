@@ -100,11 +100,11 @@ const App: React.FC = () => {
           } catch {
             errorData = { error: 'Server error', details: errorText };
           }
-          
+
           // Log the full error
           const fullError = `[${new Date().toISOString()}] Failed for ${recipient.number}: Status ${response.status} - ${JSON.stringify(errorData)}`;
           setErrorLogs(prev => [...prev, fullError]);
-          
+
           throw new Error(errorData.details || errorData.error || 'Failed to send message via API.');
         }
 
